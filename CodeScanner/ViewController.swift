@@ -35,12 +35,14 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
+            print("Error al configurar la entrada de video: \(error.localizedDescription)")
             return
         }
 
         if (captureSession.canAddInput(videoInput)) {
             captureSession.addInput(videoInput)
         } else {
+            print("No se pudo agregar la entrada de video")
             return
         }
 
@@ -52,6 +54,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             metadataOutput.metadataObjectTypes = [.ean8, .ean13, .qr]
         } else {
+            print("No se pudo agregar la salida de metadatos")
             return
         }
 
@@ -69,6 +72,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        captureSession.stopRunning()
+    }
+
+    
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         captureSession.stopRunning()
 
@@ -79,8 +88,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             
             showFoundCode(code: stringValue, type: metadataObject.type)
         }
-        
-        dismiss(animated: true)
     }
 
     func showFoundCode(code: String, type: AVMetadataObject.ObjectType ) {
